@@ -403,7 +403,7 @@ encode_flag(Type, [Flag|Next], Value) when is_atom(Flag) ->
     end.
 
 encode_flag(Type, Flag) ->
-    io:format("encode_flag: ~p, ~p~n", [Type, Flag]),
+    %% io:format("encode_flag: ~p, ~p~n", [Type, Flag]),
     encode_flag(Type, Flag, 0).
 
 
@@ -556,7 +556,7 @@ nl_dec_nla(Family, Fun, Data)
 nl_enc_nla(_Family, _Fun, [], Acc) ->
     list_to_binary(lists:reverse(Acc));
 nl_enc_nla(Family, Fun, [Head|Rest], Acc) ->
-    io:format("nl_enc_nla: ~w, ~w~n", [Family, Head]),
+    %% io:format("nl_enc_nla: ~w, ~w~n", [Family, Head]),
     H = Fun(Family, Head),
     nl_enc_nla(Family, Fun, Rest, [H|Acc]).
 
@@ -588,12 +588,12 @@ nl_enc_payload(rtnetlink, MsgType, {Family, PrefixLen, Flags, Scope, Index, Req}
 nl_enc_payload(rtnetlink, MsgType, {Family, DstLen, SrcLen, Tos, Table, Protocol, Scope, RtmType, Flags, Req})
   when MsgType == newroute; MsgType == delroute ; MsgType == getroute ->
     Fam = gen_socket:family(Family),
-    io:format("nl_enc_payload: ~p~n", [{Family, DstLen, SrcLen, Tos, Table, Protocol, Scope, RtmType, Flags, Req}]),
-    io:format("~p, ~p, ~p, ~p, ~p~n", [encode_rtnetlink_rtm_table(Table),
-				       encode_rtnetlink_rtm_protocol(Protocol),
-				       encode_rtnetlink_rtm_scope(Scope),
-				       encode_rtnetlink_rtm_type(RtmType),
-				       encode_rtnetlink_rtm_flags(Flags)]),
+    %% io:format("nl_enc_payload: ~p~n", [{Family, DstLen, SrcLen, Tos, Table, Protocol, Scope, RtmType, Flags, Req}]),
+    %% io:format("~p, ~p, ~p, ~p, ~p~n", [encode_rtnetlink_rtm_table(Table),
+    %% 				       encode_rtnetlink_rtm_protocol(Protocol),
+    %% 				       encode_rtnetlink_rtm_scope(Scope),
+    %% 				       encode_rtnetlink_rtm_type(RtmType),
+    %% 				       encode_rtnetlink_rtm_flags(Flags)]),
 
     Data = nl_enc_nla(Family, fun encode_rtnetlink_route/2, Req),
     << Fam:8, DstLen:8, SrcLen:8, Tos:8,
@@ -617,6 +617,13 @@ nl_enc_payload(rtnetlink, MsgType,{Family, IfIndex, PfxType, PfxLen, Flags, Req}
     Fam = gen_socket:family(Family),
 	Data = nl_enc_nla(Family, fun encode_rtnetlink_prefix/2, Req),
 	<< Fam:8, 0:8, 0:16, IfIndex:32/native-signed-integer, PfxType:8, PfxLen:8, Flags:8, 0:8, Data/binary >>;
+
+nl_enc_payload(rtnetlink, MsgType, {Family, IfIndex, Flags, Req})
+  when MsgType == getlink; MsgType == getaddr ->
+    Fam = gen_socket:family(Family),
+    Data = nl_enc_nla(Family, fun encode_rtnetlink_link/2, Req),
+    << Fam:8, 0:8, 0:16, IfIndex:32/native-signed-integer, Flags:32/native-unsigned-integer,
+       0:32, Data/binary >>;
 
 nl_enc_payload(_, _, Data)
   when is_binary(Data) ->
@@ -657,6 +664,13 @@ nl_dec_payload(rtnetlink, MsgType, << Family:8, _Pad1:8, _Pad2:16, IfIndex:32/na
   when MsgType == newprefix; MsgType == delprefix ->
     Fam = gen_socket:family(Family),
     { Fam, IfIndex, PfxType, PfxLen, Flags, nl_dec_nla(Fam, fun decode_rtnetlink_prefix/3, Data) };
+
+nl_dec_payload(rtnetlink, MsgType, << Family:8, _Pad:8, _IfType:16/native-unsigned-integer, IfIndex:32/native-signed-integer,
+				      Flags:32/native-unsigned-integer, _ChangeMask:32/native-unsigned-integer,
+				      ExtReq/binary>>)
+  when MsgType == getlink; MsgType == getaddr ->
+    Fam = gen_socket:family(Family),
+    { Fam, IfIndex, Flags, nl_dec_nla(Fam, fun decode_rtnetlink_link/3, ExtReq)};
 
 nl_dec_payload(_SubSys, _MsgType, Data) ->
     Data.
@@ -920,7 +934,7 @@ code_change(_OldVsn, State, _Extra) ->
 handle_socket_data(Socket, NlType, SubscriptionType, Decode, #state{subscribers = Sub} = State) ->
     case gen_socket:recvfrom(Socket, 128 * 1024) of
 	{ok, _Sender, Data} ->
-	    %%  io:format("~p got: ~p~n", [NlType, Decode(Data)]),
+	    %% io:format("~p got: ~p~n", [NlType, Decode(Data)]),
 	    Subs = lists:filter(fun(Elem) ->
 					lists:member(NlType, Elem#subscription.types)
 				end, Sub),

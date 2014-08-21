@@ -839,6 +839,9 @@ decode_rtnetlink_route(_Family, 14, Value) ->
 decode_rtnetlink_route(_Family, 15, Value) ->
     {table, decode_huint32(Value)};
 
+decode_rtnetlink_route(_Family, 29, Value) ->
+    {ext_mask, decode_huint32(Value)};
+
 decode_rtnetlink_route(_Family, Id, Value) ->
     {Id, Value}.
 
@@ -997,6 +1000,9 @@ decode_rtnetlink_link(_Family, 23, Value) ->
 
 decode_rtnetlink_link(_Family, 24, Value) ->
     {vf_ports, decode_none(Value)};
+
+decode_rtnetlink_link(_Family, 29, Value) ->
+    {ext_mask, decode_huint32(Value)};
 
 decode_rtnetlink_link(_Family, Id, Value) ->
     {Id, Value}.
@@ -1876,6 +1882,9 @@ encode_rtnetlink_route(_Family, {mp_algo, Value}) ->
 encode_rtnetlink_route(_Family, {table, Value}) ->
     encode_huint32(15, Value);
 
+encode_rtnetlink_route(_Family, {ext_mask, Value}) ->
+    encode_huint32(29, Value);
+
 encode_rtnetlink_route(_Family, {Type, Value})
   when is_integer(Type), is_binary(Value) ->
     enc_nla(Type, Value).
@@ -2040,6 +2049,9 @@ encode_rtnetlink_link(_Family, Value)
 
 encode_rtnetlink_link(_Family, {vf_ports, Value}) ->
     encode_none(24, Value);
+
+encode_rtnetlink_link(_Family, {ext_mask, Value}) -> 
+    encode_huint32(29, Value);
 
 encode_rtnetlink_link(_Family, {Type, Value})
   when is_integer(Type), is_binary(Value) ->
