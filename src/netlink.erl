@@ -840,12 +840,12 @@ init(Opts) ->
     ok = gen_socket:setsockopt(CtNl, sol_socket, sndbuf, 32768),
     ok = rcvbufsiz(CtNl, 128 * 1024),
 
-    ok = setsockopt(CtNl, sol_netlink, netlink_add_membership, nfnlgrp_conntrack_new),
-    ok = setsockopt(CtNl, sol_netlink, netlink_add_membership, nfnlgrp_conntrack_update),
-    ok = setsockopt(CtNl, sol_netlink, netlink_add_membership, nfnlgrp_conntrack_destroy),
-    ok = setsockopt(CtNl, sol_netlink, netlink_add_membership, nfnlgrp_conntrack_exp_new),
-    ok = setsockopt(CtNl, sol_netlink, netlink_add_membership, nfnlgrp_conntrack_exp_update),
-    ok = setsockopt(CtNl, sol_netlink, netlink_add_membership, nfnlgrp_conntrack_exp_destroy),
+    %% ok = setsockopt(CtNl, sol_netlink, netlink_add_membership, nfnlgrp_conntrack_new),
+    %% ok = setsockopt(CtNl, sol_netlink, netlink_add_membership, nfnlgrp_conntrack_update),
+    %% ok = setsockopt(CtNl, sol_netlink, netlink_add_membership, nfnlgrp_conntrack_destroy),
+    %% ok = setsockopt(CtNl, sol_netlink, netlink_add_membership, nfnlgrp_conntrack_exp_new),
+    %% ok = setsockopt(CtNl, sol_netlink, netlink_add_membership, nfnlgrp_conntrack_exp_update),
+    %% ok = setsockopt(CtNl, sol_netlink, netlink_add_membership, nfnlgrp_conntrack_exp_destroy),
 
     {ok, RtNl} = socket(netlink, raw, ?NETLINK_ROUTE, Opts),
     ok = gen_socket:bind(RtNl, sockaddr_nl(netlink, 0, -1)),
@@ -856,7 +856,7 @@ init(Opts) ->
 
     ok = setsockopt(RtNl, sol_netlink, netlink_add_membership, rtnlgrp_link),
     ok = setsockopt(RtNl, sol_netlink, netlink_add_membership, rtnlgrp_notify),
-    ok = setsockopt(RtNl, sol_netlink, netlink_add_membership, rtnlgrp_neigh),
+    %% ok = setsockopt(RtNl, sol_netlink, netlink_add_membership, rtnlgrp_neigh),
     ok = setsockopt(RtNl, sol_netlink, netlink_add_membership, rtnlgrp_ipv4_ifaddr),
     ok = setsockopt(RtNl, sol_netlink, netlink_add_membership, rtnlgrp_ipv4_route),
     ok = setsockopt(RtNl, sol_netlink, netlink_add_membership, rtnlgrp_ipv6_ifaddr),
